@@ -17,6 +17,7 @@ def print_comparison(label, expected, result, tolerance=1e-9):
     status = f"{Colors.CORRECT}(Correct){Colors.END}" if is_correct else f"{Colors.RED}(Incorrect){Colors.END}"
     print(f"{'Expected ' + label + ':':<25} {Colors.EXPECTED}{expected}{Colors.END}")
     print(f"{'Result:':<25} {Colors.GREEN}{result}{Colors.END} {status}")
+    print()
 
 def test_norms():
     print(f"\n{Colors.HEADER}--- VECTOR NORMS TEST ---{Colors.END}\n")

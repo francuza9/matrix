@@ -21,6 +21,7 @@ def print_comparison(label, expected, result, tolerance=1e-9):
         print(f"{'Result:':<25} {Colors.GREEN}{result}{Colors.END} {status}")
     else:
         print(f"{'Result:':<25} {Colors.RED}{result}{Colors.END} {status}")
+    print()
 
 def test_cos():
     print(f"\n{Colors.HEADER}--- VECTOR COSINE ANGLE TEST ---{Colors.END}\n")
