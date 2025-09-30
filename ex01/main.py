@@ -1,4 +1,4 @@
-from linear_combination import linear_combination
+from linear_operations import linear_combination
 from Vector import Vector
 
 class Colors:
