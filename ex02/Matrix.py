@@ -1,23 +1,37 @@
-
 class Matrix:
 
     def __init__(self, data):
         """
-        Initialize the Matrix with a list of lists.
-
+        Initialize the Matrix in column-major order.
+        
         Args:
-            data (list of lists): The data to initialize the matrix with.
+            data (list of lists): Row-major matrix (outer list = rows, inner list = row values).
         Raises:
-            ValueError: If data is empty or not a list of lists, or if rows have inconsistent lengths.
+            ValueError: If rows are empty or inconsistent in length.
         """
         if not data or not all(isinstance(row, list) for row in data):
-            raise ValueError("Data must be a non-empty list of lists.")
-        if data:
-            expected_cols = len(data[0])
-            for i, row in enumerate(data):
-                if len(row) != expected_cols:
-                    raise ValueError(f"All rows must have same length. Row {i} has {len(row)}, expected {expected_cols}")
-        self.data = [row[:] for row in data]
+            raise ValueError("Data must be a non-empty list of row lists.")
+
+        expected_cols = len(data[0])
+        for i, row in enumerate(data):
+            if len(row) != expected_cols:
+                raise ValueError(f"All rows must have the same length. Row {i} has {len(row)}, expected {expected_cols}")
+
+        # Transpose rows -> columns for column-major storage
+        self.data = [[row[j] for row in data] for j in range(expected_cols)]
+
+    @classmethod
+    def from_columns(cls, columns):
+        """
+        Create a Matrix directly from column-major data.
+        
+        Args:
+            columns (list of lists): Column-major representation
+                                     (outer list = columns, inner list = values in that column).
+        """
+        m = cls.__new__(cls)       # bypass __init__
+        m.data = [list(col) for col in columns]
+        return m
 
     def __add__(self, other):
         """
@@ -30,11 +44,11 @@ class Matrix:
         """
         if not isinstance(other, Matrix):
             return NotImplemented
-        result_data = []
-        for row_self, row_other in zip(self.data, other.data):
-            result_data.append([a + b for a, b in zip(row_self, row_other)])
-        return Matrix(result_data)
-    
+        result_cols = []
+        for col_self, col_other in zip(self.data, other.data):
+            result_cols.append([a + b for a, b in zip(col_self, col_other)])
+        return Matrix.from_columns(result_cols)
+
     def __sub__(self, other):
         """
         Subtract two matrices element-wise.
@@ -46,10 +60,10 @@ class Matrix:
         """
         if not isinstance(other, Matrix):
             return NotImplemented
-        result_data = []
-        for row_self, row_other in zip(self.data, other.data):
-            result_data.append([a - b for a, b in zip(row_self, row_other)])
-        return Matrix(result_data)
+        result_cols = []
+        for col_self, col_other in zip(self.data, other.data):
+            result_cols.append([a - b for a, b in zip(col_self, col_other)])
+        return Matrix.from_columns(result_cols)
     
     def scl(self, scalar):
         """
@@ -60,42 +74,20 @@ class Matrix:
         Returns:
             Matrix: A new Matrix instance representing the scaled matrix.
         """
-        result_data = []
-        for row in self.data:
-            result_data.append([scalar * x for x in row])
-        return Matrix(result_data)
-    
-    def __mul__(self, other):
-        if isinstance(other, (int, float)):
-            # Scalar multiplication: matrix * scalar
-            return self.scl(other)
-        elif isinstance(other, Matrix):
-            # Matrix multiplication: matrix * matrix
-            rows_self = len(self.data)
-            cols_self = len(self.data[0]) if self.data else 0
-            rows_other = len(other.data)
-            cols_other = len(other.data[0]) if other.data else 0
-
-            if cols_self != rows_other:
-                raise ValueError("Incompatible dimensions for matrix multiplication.")
-
-            result_data = []
-            for i in range(rows_self):
-                result_row = []
-                for j in range(cols_other):
-                    sum_product = sum(self.data[i][k] * other.data[k][j] for k in range(cols_self))
-                    result_row.append(sum_product)
-                result_data.append(result_row)
-            return Matrix(result_data)
-        else:
-            return NotImplemented
-
-    def __rmul__(self, other):
-        if isinstance(other, (int, float)):
-            return self.scl(other)
-        return NotImplemented
+        result_cols = []
+        for col in self.data:
+            result_cols.append([scalar * x for x in col])
+        return Matrix.from_columns(result_cols)
     
     def __eq__(self, other):
+        """
+        Check if two matrices are equal within a small tolerance.
+
+        Args:
+            other (Matrix): The matrix to compare with.
+        Returns:
+            bool: True if matrices are equal, False otherwise.
+        """
         if not isinstance(other, Matrix):
             return False
         if self.shape() != other.shape():
@@ -116,7 +108,7 @@ class Matrix:
         """
         if not self.data:
             return (0, 0)
-        return (len(self.data), len(self.data[0]) if self.data else 0)
+        return (len(self.data[0]), len(self.data))  # (rows, cols)
     
     def is_square(self):
         """
@@ -133,7 +125,12 @@ class Matrix:
     def __str__(self):
         if not self.data:
             return "M[]"
-        return '\n'.join([f"[{', '.join(map(str, row))}]" for row in self.data])
+        rows, cols = self.shape()
+        lines = []
+        for i in range(rows):
+            row = [str(self.data[j][i]) for j in range(cols)]
+            lines.append("[" + ", ".join(row) + "]")
+        return "\n".join(lines)
     
     def to_vector(self):
         """ 
@@ -143,7 +140,5 @@ class Matrix:
             Vector: A new Vector instance containing all elements of the matrix in a single list.
         """
         from Vector import Vector
-        if not self.data:
-            return Vector([])
-        flat_data = [elem for row in self.data for elem in row]
-        return Vector(flat_data)
+        flat = [elem for col in self.data for elem in col]
+        return Vector(flat)

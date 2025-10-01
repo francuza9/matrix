@@ -16,7 +16,8 @@ def linear_combination(objects, scalars):
         result = Vector([0] * first.size())
     elif isinstance(first, Matrix):
         rows, cols = first.shape()
-        result = Matrix([[0] * cols for _ in range(rows)])
+        row_major = [[0 for _ in range(cols)] for _ in range(rows)]
+        result = Matrix(row_major)
     else:
         result = first.scl(0)
     
