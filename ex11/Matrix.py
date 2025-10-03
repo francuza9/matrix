@@ -39,6 +39,19 @@ class Matrix:
 		return m
 	
 	def determinant(self):
+		"""
+		Calculate the determinant of the matrix using cofactor expansion.
+
+		Algorithm:
+		- For 1x1 matrix, return the single element.
+		- For 2x2 matrix, use ad - bc.
+		- For 3x3 and 4x4, use cofactor expansion along the first row.
+		Returns:
+			float: The determinant of the matrix.
+		Raises:
+			ValueError: If the matrix is not square.
+			NotImplementedError: If the matrix is larger than 4x4.
+		"""
 		if not self.is_square():
 			raise ValueError("Determinant is only defined for square matrices.")
 		
