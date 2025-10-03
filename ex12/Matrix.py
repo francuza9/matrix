@@ -37,7 +37,7 @@ class Matrix:
 		m = cls.__new__(cls)       # bypass __init__
 		m.data = [list(col) for col in columns]
 		return m
-	
+
 	def inverse(self):
 		"""
 		Calculate the inverse of the matrix using Gauss-Jordan elimination.
