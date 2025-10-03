@@ -39,6 +39,18 @@ class Matrix:
 		return m
 	
 	def inverse(self):
+		"""
+		Calculate the inverse of the matrix using Gauss-Jordan elimination.
+
+		Algorithm:
+		- Augment the matrix A with the identity matrix I to form [A | I].
+		- Use row operations to convert A into the identity matrix.
+		- The transformed I will become A^(-1).
+		Returns:
+			Matrix: The inverse of the matrix.
+		Raises:
+			ValueError: If the matrix is not square or is singular (non-invertible).
+		"""
 		if not self.is_square():
 			raise ValueError("Inverse is only defined for square matrices.")
 		n, _ = self.shape()
